@@ -1,0 +1,9 @@
+# Cloudflare Pages configuration
+name = "before-trip-to-japan"
+compatibility_date = "2026-08-01"
+pages_build_output_dir = "dist/public"
+
+# R2 bucket binding for image uploads (create the bucket first)
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "btj-image"

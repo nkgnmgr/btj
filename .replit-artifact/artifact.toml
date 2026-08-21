@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Before Trip to Japan"
+version = "1.0.0"
+id = "artifacts/before-trip-to-japan"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21370
+
+[services.development]
+run = "pnpm --filter @workspace/before-trip-to-japan run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/before-trip-to-japan", "run", "build" ]
+publicDir = "artifacts/before-trip-to-japan/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21370"
+BASE_PATH = "/"
