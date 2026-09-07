@@ -54,8 +54,8 @@ async function fetchSupabasePages() {
       return null;
     }
     const rows = await res.json();
-    if (!Array.isArray(rows) || rows.length === 0) {
-      console.warn("Supabase returned no published pages; using bundled data.");
+    if (!Array.isArray(rows)) {
+      console.warn("Supabase returned invalid pages data; using bundled data.");
       return null;
     }
     // Special "_"-prefixed pages (e.g. homepage content) are not country pages.
@@ -118,7 +118,7 @@ function renderPage({ title, description, pathName, jsonLd }) {
     `<meta property="og:image" content="${esc(ogImage)}" />`,
     canonical ? `<meta property="og:url" content="${esc(canonical)}" />` : "",
     `<meta name="twitter:card" content="summary_large_image" />`,
-    `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`,
+    `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script>`,
   ]
     .filter(Boolean)
     .join("\n    ");

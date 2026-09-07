@@ -113,7 +113,41 @@ create policy "admin delete"
   on public.pages for delete
   to authenticated using (public.is_admin());
 
--- 6. 管理者の登録（★必ず実行してください★）
+-- 6. SNSリンク投稿
+--    公開サイトから誰でも追加できます。閲覧は全員、削除は管理者だけです。
+create table if not exists public.social_posts (
+  id uuid primary key default gen_random_uuid(),
+  url text not null unique,
+  caption text not null default '' check (char_length(caption) <= 500),
+  added_at timestamptz not null default now(),
+  constraint social_posts_https check (url ~ '^https://'),
+  constraint social_posts_supported_host check (
+    url ~ '^https://(www\.|m\.|mobile\.)?(x\.com|twitter\.com|instagram\.com|tiktok\.com|youtube\.com|youtu\.be|facebook\.com|fb\.watch|threads\.net|threads\.com|bsky\.app)/'
+  )
+);
+
+alter table public.social_posts enable row level security;
+
+drop policy if exists "public read social posts" on public.social_posts;
+create policy "public read social posts"
+  on public.social_posts for select
+  using (true);
+
+drop policy if exists "public add social posts" on public.social_posts;
+create policy "public add social posts"
+  on public.social_posts for insert
+  to anon, authenticated
+  with check (
+    char_length(url) <= 2048
+    and char_length(caption) <= 500
+  );
+
+drop policy if exists "admin delete social posts" on public.social_posts;
+create policy "admin delete social posts"
+  on public.social_posts for delete
+  to authenticated using (public.is_admin());
+
+-- 7. 管理者の登録（★必ず実行してください★）
 --    下の 'YOUR_EMAIL@example.com' を管理者アカウントのメールアドレスに
 --    書き換えてから実行すると、そのユーザーが管理者になります。
 -- insert into public.site_admins (user_id)

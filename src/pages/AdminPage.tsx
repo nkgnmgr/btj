@@ -1,3 +1,4 @@
+import SocialTimelineEditor from "@/components/SocialTimelineEditor";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -222,7 +223,7 @@ function Dashboard() {
 
   const seed = useMutation({
     mutationFn: async () => {
-      const rows = bundledPages.map((p, i) =>
+      const rows = bundledPages.filter(p => !p.slug.startsWith("_")).map((p, i) =>
         pageToRow({ ...p, sort: i, published: true }),
       );
       const { error } = await getSupabase()
@@ -362,7 +363,7 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {pages.map((p) => (
+                {pages.filter(p => !p.slug.startsWith("_")).map((p) => (
                   <tr key={p.id} className="border-b border-gray-50 last:border-0">
                     <td className="px-4 py-3">
                       <span className="mr-2">{p.flag}</span>
@@ -410,6 +411,7 @@ function Dashboard() {
             Home page
           </h2>
           <HomeContentEditor />
+          <SocialTimelineEditor />
         </div>
       </main>
     </div>

@@ -35,6 +35,9 @@ const BLOCKED_UA = [
 const hits = new Map<string, { count: number; reset: number }>();
 const WINDOW_MS = 60_000;
 const MAX_API_REQUESTS = 30;
+const socialPostHits = new Map<string, { count: number; reset: number }>();
+const SOCIAL_POST_WINDOW_MS = 60 * 60_000;
+const MAX_SOCIAL_POSTS_PER_HOUR = 3;
 
 export const onRequest = async (context: {
   request: Request;
@@ -51,6 +54,23 @@ export const onRequest = async (context: {
   if (url.pathname.startsWith("/api/")) {
     const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
     const now = Date.now();
+    if (request.method === "POST" && url.pathname === "/api/social-posts") {
+      const socialEntry = socialPostHits.get(ip);
+      if (!socialEntry || now > socialEntry.reset) {
+        socialPostHits.set(ip, { count: 1, reset: now + SOCIAL_POST_WINDOW_MS });
+      } else if (++socialEntry.count > MAX_SOCIAL_POSTS_PER_HOUR) {
+        return new Response(JSON.stringify({
+          error: "Too many links submitted. Please try again later.",
+        }), {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(Math.ceil((socialEntry.reset - now) / 1000)),
+          },
+        });
+      }
+      if (socialPostHits.size > 10_000) socialPostHits.clear();
+    }
     const entry = hits.get(ip);
     if (!entry || now > entry.reset) {
       hits.set(ip, { count: 1, reset: now + WINDOW_MS });

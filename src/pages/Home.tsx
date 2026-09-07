@@ -1,3 +1,4 @@
+import SocialTimeline from "@/components/SocialTimeline";
 import { Link } from "wouter";
 import {
   usePublishedPages,
@@ -73,6 +74,8 @@ export default function Home() {
             </Link>
           ))}
         </div>
+
+        <SocialTimeline />
 
         <div className="mt-12 border-t border-gray-100 pt-8">
           <h2 className="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">
